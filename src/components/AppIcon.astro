@@ -1,0 +1,5 @@
+---
+interface Props { color: string; monogram: string; size?: number }
+const { color, monogram, size = 56 } = Astro.props;
+---
+<span class="app-icon" style={`--c:${color};--s:${size}px`} aria-hidden="true">{monogram}</span>

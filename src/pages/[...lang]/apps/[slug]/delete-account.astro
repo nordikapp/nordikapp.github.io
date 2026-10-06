@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import Doc from '../../../../layouts/Doc.astro';
+import { site } from '../../../../site.config';
+import { ui, langPaths, getLang } from '../../../../i18n';
+
+export async function getStaticPaths() {
+  const apps = (await getCollection('apps')).filter((a) => a.data.accounts);
+  return langPaths().flatMap(({ params }) => apps.map((app) => ({ params: { ...params, slug: app.id }, props: { app } })));
+}
+const { app } = Astro.props;
+const { data, id } = app;
+const lang = getLang(Astro.params.lang);
+const subject = encodeURIComponent(`[${data.name}] ${lang === 'fr' ? 'Suppression de compte' : 'Account deletion'}`);
+---
+<Doc lang={lang} title={ui[lang].deleteAccount} kicker={data.name} altPath={`apps/${id}/delete-account`}>
+  {lang === 'fr' ? (
+    <>
+      <h2>Depuis l’application</h2>
+      <p>Ouvrez {data.name}, allez dans Réglages, puis Compte, puis « Supprimer mon compte », et confirmez.</p>
+      <h2>Par courriel</h2>
+      <p>Si vous n’avez plus accès à l’application, écrivez à <a href={`mailto:${site.privacyEmail}?subject=${subject}`}>{site.privacyEmail}</a> depuis l’adresse liée à votre compte. Nous traitons la demande sous 30 jours.</p>
+      <h2>Données supprimées</h2>
+      <p>Votre compte et les données qui y sont associées sont effacés :</p>
+      <ul>{data.dataCollected.fr.map((d) => <li>{d}</li>)}</ul>
+      <p>Les copies de sauvegarde sont purgées dans un délai maximal de 90 jours. Certaines données peuvent être conservées plus longtemps lorsque la loi l’exige (par exemple, les pièces comptables).</p>
+    </>
+  ) : (
+    <>
+      <h2>From the app</h2>
+      <p>Open {data.name}, go to Settings, then Account, then “Delete my account”, and confirm.</p>
+      <h2>By email</h2>
+      <p>If you can no longer access the app, write to <a href={`mailto:${site.privacyEmail}?subject=${subject}`}>{site.privacyEmail}</a> from the address linked to your account. We process requests within 30 days.</p>
+      <h2>Data deleted</h2>
+      <p>Your account and its associated data are erased:</p>
+      <ul>{data.dataCollected.en.map((d) => <li>{d}</li>)}</ul>
+      <p>Backup copies are purged within 90 days at most. Some data may be kept longer where the law requires it (for example, accounting records).</p>
+    </>
+  )}
+</Doc>

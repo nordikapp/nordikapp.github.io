@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import Doc from '../../../../layouts/Doc.astro';
+import { site } from '../../../../site.config';
+import { ui, langPaths, getLang } from '../../../../i18n';
+
+export async function getStaticPaths() {
+  const apps = await getCollection('apps');
+  return langPaths().flatMap(({ params }) => apps.map((app) => ({ params: { ...params, slug: app.id }, props: { app } })));
+}
+const { app } = Astro.props;
+const { data, id } = app;
+const lang = getLang(Astro.params.lang);
+const third = data.thirdParties;
+---
+<Doc lang={lang} title={ui[lang].privacy} kicker={data.name} altPath={`apps/${id}/privacy`} updated={data.privacyUpdated}>
+  {lang === 'fr' ? (
+    <>
+      <p>La présente politique décrit comment {site.legalName}, faisant affaire sous le nom {site.brand}, traite les renseignements personnels recueillis par {data.name}. Elle est rédigée conformément à la Loi sur la protection des renseignements personnels dans le secteur privé du Québec (Loi 25) et à la LPRPDE.</p>
+      <h2>Renseignements recueillis</h2>
+      <ul>{data.dataCollected.fr.map((d) => <li>{d}</li>)}</ul>
+      <p>Nous ne recueillons que ce qui est nécessaire au fonctionnement de {data.name}. Nous ne vendons aucun renseignement personnel et n’utilisons aucune publicité ciblée.</p>
+      <h2>Finalités</h2>
+      <p>Ces renseignements servent à fournir le service, à gérer votre compte, à répondre à vos demandes de support et à assurer la sécurité de l’application.</p>
+      <h2>Communication à des tiers</h2>
+      {third.length > 0
+        ? <p>Les données sont hébergées par les fournisseurs suivants, liés par contrat à des obligations de confidentialité : {third.join(', ')}. Elles peuvent être stockées hors du Québec ; une évaluation des facteurs relatifs à la vie privée a été menée à cet effet.</p>
+        : <p>Aucun renseignement n’est communiqué à des tiers, sauf obligation légale.</p>}
+      <h2>Conservation et sécurité</h2>
+      <p>Les renseignements sont conservés tant que votre compte est actif, puis supprimés. Ils sont protégés par des mesures raisonnables : chiffrement des communications, accès restreint, sauvegardes sécurisées.</p>
+      <h2>Vos droits</h2>
+      <p>Vous pouvez demander l’accès à vos renseignements, leur rectification ou leur suppression, et retirer votre consentement. Vous pouvez aussi porter plainte auprès de la Commission d’accès à l’information du Québec.</p>
+      <h2>Responsable de la protection des renseignements personnels</h2>
+      <p>{site.privacyOfficer}, <a href={`mailto:${site.privacyEmail}`}>{site.privacyEmail}</a>, {site.address}.</p>
+      <h2>Modifications</h2>
+      <p>Toute modification importante sera annoncée dans l’application et datée sur cette page.</p>
+    </>
+  ) : (
+    <>
+      <p>This policy describes how {site.legalName}, doing business as {site.brand}, handles personal information collected by {data.name}. It follows Québec’s Act respecting the protection of personal information in the private sector (Law 25) and PIPEDA.</p>
+      <h2>Information collected</h2>
+      <ul>{data.dataCollected.en.map((d) => <li>{d}</li>)}</ul>
+      <p>We only collect what {data.name} needs to work. We never sell personal information and use no targeted advertising.</p>
+      <h2>Purposes</h2>
+      <p>This information is used to provide the service, manage your account, answer support requests and keep the app secure.</p>
+      <h2>Sharing with third parties</h2>
+      {third.length > 0
+        ? <p>Data is hosted by the following providers, contractually bound to confidentiality: {third.join(', ')}. It may be stored outside Québec; a privacy impact assessment was carried out for this purpose.</p>
+        : <p>No information is shared with third parties, except where required by law.</p>}
+      <h2>Retention and security</h2>
+      <p>Information is kept while your account is active, then deleted. It is protected by reasonable safeguards: encrypted communications, restricted access, secure backups.</p>
+      <h2>Your rights</h2>
+      <p>You may request access to, correction or deletion of your information, and withdraw your consent. You may also file a complaint with the Commission d’accès à l’information du Québec.</p>
+      <h2>Privacy officer</h2>
+      <p>{site.privacyOfficer}, <a href={`mailto:${site.privacyEmail}`}>{site.privacyEmail}</a>, {site.address}.</p>
+      <h2>Changes</h2>
+      <p>Any material change will be announced in the app and dated on this page.</p>
+    </>
+  )}
+</Doc>

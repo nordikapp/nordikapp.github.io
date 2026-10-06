@@ -1,0 +1,15 @@
+---
+import Base from './Base.astro';
+import { ui, fmtDate, type Lang } from '../i18n';
+
+interface Props { lang: Lang; title: string; altPath: string; kicker?: string; updated?: Date }
+const { lang, title, altPath, kicker, updated } = Astro.props;
+---
+<Base lang={lang} title={kicker ? `${title} · ${kicker}` : title} altPath={altPath}>
+  <article class="wrap doc">
+    {kicker && <p class="kicker">{kicker}</p>}
+    <h1>{title}</h1>
+    {updated && <p class="muted">{ui[lang].updated} : {fmtDate(updated, lang)}</p>}
+    <slot />
+  </article>
+</Base>

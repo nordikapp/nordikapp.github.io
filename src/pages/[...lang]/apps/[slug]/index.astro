@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../../../layouts/Base.astro';
+import AppIcon from '../../../../components/AppIcon.astro';
+import { ui, href, langPaths, getLang } from '../../../../i18n';
+
+export async function getStaticPaths() {
+  const apps = await getCollection('apps');
+  return langPaths().flatMap(({ params }) => apps.map((app) => ({ params: { ...params, slug: app.id }, props: { app } })));
+}
+const { app } = Astro.props;
+const { data, id } = app;
+const lang = getLang(Astro.params.lang);
+const t = ui[lang];
+const storeLabel = lang === 'fr'
+  ? { appStore: 'Télécharger dans l’App Store', googlePlay: 'Disponible sur Google Play', web: 'Ouvrir l’application web' }
+  : { appStore: 'Download on the App Store', googlePlay: 'Get it on Google Play', web: 'Open the web app' };
+const links = Object.entries(data.links).filter(([, url]) => url) as [keyof typeof storeLabel, string][];
+---
+<Base lang={lang} title={data.name} description={data.tagline[lang]} altPath={`apps/${id}`}>
+  <section class="hero hero-app" style={`--c:${data.color}`}>
+    <div class="wrap app-head">
+      <AppIcon color={data.color} monogram={data.monogram} size={96} />
+      <div>
+        <h1>{data.name}</h1>
+        <p class="lead">{data.tagline[lang]}</p>
+        <p class="meta">
+          <span class="badge">{t.status[data.status]}</span>
+          {data.platforms.map((p) => t.platforms[p]).join(' · ')} · {t.by} {data.maker}
+        </p>
+      </div>
+    </div>
+  </section>
+  <section class="wrap section">
+    <p class="prose">{data.description[lang]}</p>
+    {links.length > 0 && (
+      <p class="stores">
+        {links.map(([k, url]) => <a class="button" href={url}>{storeLabel[k]}</a>)}
+      </p>
+    )}
+    <nav class="app-links">
+      <a href={href(lang, `apps/${id}/support`)}>{t.support}</a>
+      <a href={href(lang, `apps/${id}/privacy`)}>{t.privacy}</a>
+      {data.accounts && <a href={href(lang, `apps/${id}/delete-account`)}>{t.deleteAccount}</a>}
+    </nav>
+  </section>
+</Base>

@@ -1,0 +1,45 @@
+---
+import '../styles/global.css';
+import { site } from '../site.config';
+import { ui, href, type Lang } from '../i18n';
+
+interface Props { lang: Lang; title?: string; description?: string; altPath: string }
+const { lang, title, description, altPath } = Astro.props;
+const t = ui[lang];
+const other: Lang = lang === 'fr' ? 'en' : 'fr';
+const pageTitle = title ? `${title} · ${site.brand}` : `${site.brand} · ${lang === 'fr' ? site.brandFr : 'The Nordic App Galaxy'}`;
+---
+<!doctype html>
+<html lang={lang === 'fr' ? 'fr-CA' : 'en-CA'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description ?? t.tagline} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" hreflang={other === 'fr' ? 'fr-CA' : 'en-CA'} href={new URL(href(other, altPath), Astro.site)} />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href={href(lang)}>
+        <img src="/favicon.svg" alt="" width="28" height="28" />
+        <span>{site.brand}</span>
+      </a>
+      <a class="lang" href={href(other, altPath)} hreflang={other}>{t.switchLang}</a>
+    </header>
+    <main><slot /></main>
+    <footer class="footer">
+      <div class="wrap footer-grid">
+        <div>
+          <strong>{site.brand}</strong>
+          <p>{site.legalName}<br />{site.address}</p>
+        </div>
+        <nav>
+          <a href={`mailto:${site.email}`}>{site.email}</a>
+          <a href={href(lang, 'legal')}>{t.legal}</a>
+        </nav>
+      </div>
+      <p class="wrap copy">© {new Date().getFullYear()} {site.legalName}</p>
+    </footer>
+  </body>
+</html>

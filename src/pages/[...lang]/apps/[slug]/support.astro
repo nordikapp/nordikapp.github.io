@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import Doc from '../../../../layouts/Doc.astro';
+import { site } from '../../../../site.config';
+import { ui, href, langPaths, getLang } from '../../../../i18n';
+
+export async function getStaticPaths() {
+  const apps = await getCollection('apps');
+  return langPaths().flatMap(({ params }) => apps.map((app) => ({ params: { ...params, slug: app.id }, props: { app } })));
+}
+const { app } = Astro.props;
+const { data, id } = app;
+const lang = getLang(Astro.params.lang);
+const t = ui[lang];
+const subject = encodeURIComponent(`[${data.name}] Support`);
+---
+<Doc lang={lang} title={t.support} kicker={data.name} altPath={`apps/${id}/support`}>
+  {lang === 'fr' ? (
+    <>
+      <p>Une question, un problème ou une suggestion au sujet de {data.name} ? Écrivez-nous, nous répondons en général sous deux jours ouvrables.</p>
+      <p><a class="button" href={`mailto:${site.email}?subject=${subject}`}>{site.email}</a></p>
+      <h2>Pour nous aider à vous aider</h2>
+      <ul>
+        <li>le modèle de votre appareil et la version du système ;</li>
+        <li>la version de {data.name} (menu Réglages ou À propos) ;</li>
+        <li>les étapes qui mènent au problème, avec une capture d’écran si possible.</li>
+      </ul>
+    </>
+  ) : (
+    <>
+      <p>A question, a problem or an idea about {data.name}? Write to us, we usually answer within two business days.</p>
+      <p><a class="button" href={`mailto:${site.email}?subject=${subject}`}>{site.email}</a></p>
+      <h2>Help us help you</h2>
+      <ul>
+        <li>your device model and OS version;</li>
+        <li>the {data.name} version (Settings or About menu);</li>
+        <li>the steps leading to the problem, with a screenshot if possible.</li>
+      </ul>
+    </>
+  )}
+  <p><a href={href(lang, `apps/${id}/privacy`)}>{t.privacy}</a>{data.accounts && <> · <a href={href(lang, `apps/${id}/delete-account`)}>{t.deleteAccount}</a></>}</p>
+</Doc>
